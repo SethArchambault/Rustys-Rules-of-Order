@@ -125,6 +125,7 @@ void procedure(s32 change) {
                 sa_debug_log("%s gets up and storms out\n", get_role_or_name(person));
             } else {
                 sa_debug_log("%s, defeated, leaves dejectedly\n", get_role_or_name(person));
+                sa_debug_log("Without people, there can be no democracy. Game Over.\n");
             }
             clear_person(__s.people_arr[idx]);
             __s.people_arr[idx] = NULL;
@@ -138,23 +139,24 @@ void reset() {
 
 
 b32 basic_action(const char * str, Person * person, Phase phase) {
-    sa_debug_log("%s %s\n", get_role_or_name(__s.selected), str);
-    if(__s.selected == person) {
-        if (__s.phase == phase-1) {
-            procedure(1);
-            __s.phase = phase;
-        } else if (__s.phase > phase) {
-            sa_debug_log("... AGAIN\n");
-            procedure(-1);
-        } else {
-            sa_debug_log("... but it's not time for that yet.\n");
-            procedure(-1);
-        }
-    } else {
-        if (person) {
+    if (sa_button(str)) {
+        // The chair calls the meeting to order
+        sa_debug_log("%s %s\n", get_role_or_name(__s.selected), str);
+        if(__s.selected == person) {
+            if (__s.phase == phase-1) {
+                procedure(1);
+                __s.phase = phase;
+                return true;
+            } else if (__s.phase > phase) {
+                sa_debug_log("... AGAIN\n");
+            } else {
+                sa_debug_log("... but it's not time for that yet.\n");
+            }
+        } else if (person) {
             sa_debug_log("%s says, uhm, that's my job..\n", get_role_or_name(person));
+        } else {
+            sa_debug_log("... but something feels wrong about it.\n");
         }
-        // not chair
         procedure(-1);
     }
     return false;
@@ -215,28 +217,20 @@ void game_loop() {
 
     if (__s.selected) {
         sa::SeparatorText( __s.selected->name);
-        if(sa_button("call the meeting to order")) {
-            basic_action("calls the meeting to order", __s.chair, phase_call_to_order);
-        }
-        if (sa_button("Move to read previous meeting notes")) {
-            basic_action("moves to read the previous meeting notes", __s.chair, 
-                    phase_read_minutes);
-        }
-        if (sa_button("Move to Choose Notetaker")) {
-            basic_action("moves to choose notetaker", __s.chair, 
-                phase_choose_notetaker);
-        }
-        if (sa_button("Take Attendance")) {
-            basic_action("takes attendance", __s.chair, phase_take_attendance); 
-        }
-        if (sa_button("Move to New Business")) {
-            basic_action("moves to new business", __s.chair, phase_new_business); 
-        }
-        if (sa_button("Move to Old Business")) {
-            basic_action("moves to old business", __s.chair, phase_old_business); 
-        }
-        if (sa_button("Call to Adjorn")) {
-            basic_action("calls to adjorn", __s.chair, phase_end); 
+        basic_action("calls the meeting to order", __s.chair, phase_call_to_order);
+        basic_action("moves to choose notetaker", __s.chair, phase_choose_notetaker);
+        basic_action("moves to take attendance", __s.chair, phase_take_attendance); 
+        basic_action("moves to read the previous meeting notes", __s.chair, phase_read_minutes);
+        basic_action("moves to approve this meeting's agenda", __s.chair, phase_approve_agenda);
+        basic_action("moves to brief announcements", __s.chair, phase_announcements); 
+        basic_action("moves to reports", __s.chair, phase_reports); 
+        basic_action("moves to old business", __s.chair, phase_old_business); 
+        basic_action("moves to new business", __s.chair, phase_new_business); 
+        basic_action("moves to good and welfare", __s.chair, phase_good_and_welfare); 
+        basic_action("moves to pick the next chair", __s.chair, phase_next_chair); 
+        basic_action("moves to critique meeting", __s.chair, phase_meeting_critique); 
+        if(basic_action("moves to adjorn", __s.chair, phase_end)) {
+            sa_debug_log("Meeting complete!");
         }
     }
 
