@@ -1,0 +1,9 @@
+temp
+.DS_Store
+.vs
+*.swp
+*.map
+*.obj
+*.dll
+*.exp
+*.pdb
