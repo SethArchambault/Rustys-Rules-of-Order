@@ -137,8 +137,8 @@ void procedure(s32 change) {
 }
 
 
-b32 basic_action(const char * str, Person * person, Phase phase) {
-    if (imgui::Selectable(str)) {
+b32 basic_action(const char * title, const char * str, Person * person, Phase phase) {
+    if (imgui::Selectable(title)) {
         // The chair calls the meeting to order
         __s.log_buffer.appendf("%s %s\n", get_role_or_name(__s.selected), str);
         if(__s.selected == person) {
@@ -226,21 +226,20 @@ void game_loop() {
 
     imgui::EndChild();
     if (__s.selected) {
-        imgui::SeparatorText("Actions");
-        ImGui::BeginChild("actions", {screen.x -30,400}, ImGuiChildFlags_Borders, ImGuiWindowFlags_HorizontalScrollbar);
-        basic_action("calls the meeting to order", __s.chair, phase_call_to_order);
-        basic_action("moves to choose notetaker", __s.chair, phase_choose_notetaker);
-        basic_action("moves to take attendance", __s.chair, phase_take_attendance); 
-        basic_action("moves to read the previous meeting notes", __s.chair, phase_read_minutes);
-        basic_action("moves to approve this meeting's agenda", __s.chair, phase_approve_agenda);
-        basic_action("moves to brief announcements", __s.chair, phase_announcements); 
-        basic_action("moves to reports", __s.chair, phase_reports); 
-        basic_action("moves to old business", __s.chair, phase_old_business); 
-        basic_action("moves to new business", __s.chair, phase_new_business); 
-        basic_action("moves to good and welfare", __s.chair, phase_good_and_welfare); 
-        basic_action("moves to pick the next chair", __s.chair, phase_next_chair); 
-        basic_action("moves to critique meeting", __s.chair, phase_meeting_critique); 
-        if(basic_action("moves to adjorn", __s.chair, phase_end)) {
+        ImGui::BeginChild("actions", {screen.x -30,470}, ImGuiChildFlags_Borders);
+        basic_action("call to order", "calls the meeting to order", __s.chair, phase_call_to_order);
+        basic_action("choose notetaker", "moves to choose notetaker", __s.chair, phase_choose_notetaker);
+        basic_action("attendenance", "moves to take attendance", __s.chair, phase_take_attendance); 
+        basic_action("previous meeting notes", "moves to read the previous meeting notes", __s.chair, phase_read_minutes);
+        basic_action("approve agenda", "moves to approve this meeting's agenda", __s.chair, phase_approve_agenda);
+        basic_action("announcements", "moves to brief announcements", __s.chair, phase_announcements); 
+        basic_action("reports", "moves to reports", __s.chair, phase_reports); 
+        basic_action("old business", "moves to old business", __s.chair, phase_old_business); 
+        basic_action("new business", "moves to new business", __s.chair, phase_new_business); 
+        basic_action("good and welfare", "moves to good and welfare", __s.chair, phase_good_and_welfare); 
+        basic_action("pick next chair", "moves to pick the next chair", __s.chair, phase_next_chair); 
+        basic_action("critique meeting", "moves to critique meeting", __s.chair, phase_meeting_critique); 
+        if(basic_action("adjorn", "moves to adjorn", __s.chair, phase_end)) {
             __s.log_buffer.appendf("Meeting complete!");
         }
         imgui::EndChild();
