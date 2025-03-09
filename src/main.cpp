@@ -244,7 +244,11 @@ void game_loop() {
         ImGui::EndPopup();
     }
 
+    imgui::SeparatorText("Notes");
+    ImGui::BeginChild("scrolling", {470,400}, ImGuiChildFlags_Borders);
+    ImGui::SetScrollY(1000);
     sa_text("%s", __s.log_buffer.c_str());
+    imgui::EndChild();
     imgui::End();
     
 }

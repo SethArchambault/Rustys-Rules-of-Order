@@ -91,7 +91,7 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .frame_cb = frame,
         .cleanup_cb = cleanup,
         .event_cb = event,
-        .width = 800,
+        .width = 500,
         .height = 600,
         .window_title = "Rusty's Rules",
         .icon = {
