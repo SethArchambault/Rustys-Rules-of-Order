@@ -198,7 +198,7 @@ void game_loop() {
 
 
 
-    imgui::BeginChild("People", {0, 150});
+    imgui::BeginChild("People", {0, 5*imgui::GetFontSize()});
 
     //
     // Draw people
@@ -226,7 +226,7 @@ void game_loop() {
 
     imgui::EndChild();
     if (__s.selected) {
-        ImGui::BeginChild("actions", {screen.x -30,470}, ImGuiChildFlags_Borders);
+        ImGui::BeginChild("actions", {screen.x -30,18*imgui::GetFontSize()}, ImGuiChildFlags_Borders);
         basic_action("call to order", "calls the meeting to order", __s.chair, phase_call_to_order);
         basic_action("choose notetaker", "moves to choose notetaker", __s.chair, phase_choose_notetaker);
         basic_action("attendenance", "moves to take attendance", __s.chair, phase_take_attendance); 
@@ -245,7 +245,7 @@ void game_loop() {
         imgui::EndChild();
     } else {
         imgui::SeparatorText("Notes");
-        ImGui::BeginChild("notes", {screen.x -30,400}, ImGuiChildFlags_Borders);
+        ImGui::BeginChild("notes", {screen.x -30,16*imgui::GetFontSize()}, ImGuiChildFlags_Borders);
         ImGui::SetScrollY(1000);
         imgui::TextWrapped("%s", __s.log_buffer.c_str());
         imgui::EndChild();

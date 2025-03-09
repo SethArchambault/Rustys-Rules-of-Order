@@ -36,7 +36,7 @@ static void init(void) {
     sg_pass_action action = {
         .colors = {{ 
             .load_action = SG_LOADACTION_CLEAR, 
-            .clear_value = { 0.0f, 0.5f, 1.0f, 1.0 } 
+            .clear_value = { 0.0f, 0.0f, 0.0f, 1.0 } 
         }}
     };
     state.pass_action = action;
