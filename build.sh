@@ -31,6 +31,7 @@ src/main.cpp
 -fobjc-arc
 -Werror -Wall -Wextra -Wshadow -Wconversion
 -Wno-unused-variable -Wno-unused-parameter -Wno-deprecated-declarations -Wno-unused-value 
+-Wno-unused-but-set-parameter
 -Wno-deprecated-enum-enum-conversion
 -Wno-unused-function -Wno-missing-field-initializers -Wno-implicit-float-conversion 
 -framework Metal -framework Cocoa -framework MetalKit -framework Quartz 

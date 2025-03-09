@@ -42,7 +42,10 @@ struct Person {
 enum Phase {
     phase_none,
     phase_call_to_order,
-    phase_choose_notetaker,
+    phase_notetaker_choose,
+    phase_notetaker_nominate,
+    phase_notetaker_second,
+    phase_notetaker_waited,
     phase_take_attendance,
     phase_read_minutes,
     phase_approve_agenda,
@@ -51,10 +54,14 @@ enum Phase {
     phase_old_business,
     phase_new_business,
     phase_good_and_welfare,
-    phase_next_chair,
+    phase_chair_choose,
+    phase_chair_nomination,
+    phase_chair_second,
     phase_meeting_critique,
     phase_end
 };
+
+#define people_max 3
 
 // State
 struct {
@@ -63,9 +70,11 @@ struct {
     f32 scale = 2.0;
     b32 initialized;
     Person *selected;
+    Person *nominated;
+    Person *notetaker;
     Person *chair;
     s32 notetaker_idx = -1;
-    Person *people_arr[3];
+    Person *people_arr[people_max];
     struct {
         s32 inclusion = 0;
         s32 iww_knowledge = 0;
@@ -78,6 +87,7 @@ struct {
     char logs[200][200];
     s32 log_idx = 0;
     const char *chair_str = "The chair";
+    const char *notetaker_str = "The notetaker";
 } __s;
 #define sa_log_text ImGui::LogText
 #define sa imgui
@@ -88,8 +98,8 @@ struct {
 //
 
 char* get_role_or_name(Person *person) {
-    if (person == __s.chair)
-        return (char *)__s.chair_str;
+    if (person == __s.chair) return (char *)__s.chair_str;
+    if (person == __s.notetaker) return (char *)__s.notetaker_str;
     return (char *)person->name;
 }
 
@@ -138,29 +148,70 @@ void procedure(s32 change) {
     __s.scroll_down = true;
 }
 
+b32 basic_action(const char * title, const char * str) {
+    if (imgui::Selectable(title)) {
+        // The chair calls the meeting to order
+        __s.log_buffer.appendf("%s:\n%s\n", get_role_or_name(__s.selected), str);
+        procedure(1);
+        return true;
+        procedure(-1);
+    }
+    return false;
+}
 
-b32 basic_action(const char * title, const char * str, Person * person, Phase phase) {
-    if (__s.phase == phase-1) {
+b32 chair_action(const char * title, const char * str, Phase phase) {
+    if (__s.phase == phase-1 && __s.selected == __s.chair) {
         if (imgui::Selectable(title)) {
             // The chair calls the meeting to order
-            __s.log_buffer.appendf("%s %s\n", get_role_or_name(__s.selected), str);
-            if(__s.selected == person) {
-                if (__s.phase == phase-1) {
-                    procedure(1);
-                    __s.phase = phase;
-                    return true;
-                } else if (__s.phase > phase) {
-                    __s.log_buffer.appendf("... AGAIN\n");
-                } else {
-                    __s.log_buffer.appendf("... but it's not time for that yet.\n");
-                }
-            } else if (person) {
-                __s.log_buffer.appendf("%s says, uhm, that's my job..\n", get_role_or_name(person));
-            } else {
-                __s.log_buffer.appendf("... but something feels wrong about it.\n");
-            }
-            procedure(-1);
+            __s.log_buffer.appendf("%s:\n%s\n", get_role_or_name(__s.selected), str);
+            procedure(1);
+            __s.phase = phase;
+            return true;
         }
+    }
+    return false;
+}
+
+b32 nominate(Phase phase) {
+    if (__s.phase == phase-1) {
+        for (s32 idx = 0; idx < people_max; ++idx) {
+            Person *person2 = __s.people_arr[idx];
+            //imgui::PushID(phase);
+            //imgui::PushID(person2->name);
+            char label[200];
+            snprintf(label, 200, "Nominate %s", person2->name);
+            if (imgui::Selectable(label)) {
+                // The chair calls the meeting to order
+                __s.log_buffer.appendf("%s:\nI nominate %s\n", get_role_or_name(__s.selected), person2->name);
+                procedure(1);
+                __s.phase = phase;
+                __s.nominated = person2;
+                return true;
+            }
+            //imgui::PopID();
+            //imgui::PopID();
+        }
+    }
+    return false;
+}
+
+b32 second_nomination(Person *position, Phase phase) {
+    if (__s.phase == phase-1) {
+        //imgui::PushID(phase);
+        //imgui::PushID(person2->name);
+        char label[200];
+        snprintf(label, 200, "Second %s's Nomination", __s.nominated->name);
+        if (imgui::Selectable(label)) {
+            // The chair calls the meeting to order
+            __s.log_buffer.appendf("%s:\nI second %s's nomination\n", get_role_or_name(__s.selected), __s.nominated->name);
+            procedure(1);
+            __s.phase = phase;
+            position = __s.nominated;
+            __s.nominated = NULL;
+            return true;
+        }
+        //imgui::PopID();
+        //imgui::PopID();
     }
     return false;
 }
@@ -220,6 +271,10 @@ void game_loop() {
                 sa::SameLine();
                 sa_text("(chair)");
             }
+            if(__s.people_arr[idx] == __s.notetaker) {
+                sa::SameLine();
+                sa_text("(notetaker)");
+            }
             //sa::PopID();
         }
     }
@@ -231,21 +286,35 @@ void game_loop() {
     imgui::EndChild();
     if (__s.selected) {
         ImGui::BeginChild("actions", {screen.x -30,18*imgui::GetFontSize()}, ImGuiChildFlags_Borders);
-        basic_action("call to order", "calls the meeting to order", __s.chair, phase_call_to_order);
-        basic_action("choose notetaker", "moves to choose notetaker", __s.chair, phase_choose_notetaker);
-        basic_action("attendenance", "moves to take attendance", __s.chair, phase_take_attendance); 
-        basic_action("previous meeting notes", "moves to read the previous meeting notes", __s.chair, phase_read_minutes);
-        basic_action("approve agenda", "moves to approve this meeting's agenda", __s.chair, phase_approve_agenda);
-        basic_action("announcements", "moves to brief announcements", __s.chair, phase_announcements); 
-        basic_action("reports", "moves to reports", __s.chair, phase_reports); 
-        basic_action("old business", "moves to old business", __s.chair, phase_old_business); 
-        basic_action("new business", "moves to new business", __s.chair, phase_new_business); 
-        basic_action("good and welfare", "moves to good and welfare", __s.chair, phase_good_and_welfare); 
-        basic_action("pick next chair", "moves to pick the next chair", __s.chair, phase_next_chair); 
-        basic_action("critique meeting", "moves to critique meeting", __s.chair, phase_meeting_critique); 
-        if(basic_action("adjorn", "moves to adjorn", __s.chair, phase_end)) {
+        chair_action("call to order", "I call this meeting to order at 6:00", phase_call_to_order);
+        chair_action("choose notetaker", "I move to choose the notetaker", phase_notetaker_choose);
+        chair_action("wait", "<waits>", phase_notetaker_nominate);
+        nominate(phase_notetaker_nominate);
+        if(chair_action("reject nomination", "Hearing none, the nomination is rejected", phase_notetaker_waited)){
+            __s.nominated = NULL;
+            __s.phase = phase_notetaker_choose;
+        }
+        second_nomination(__s.notetaker, phase_notetaker_second);
+        chair_action("attendenance", "I move to take attendance", phase_take_attendance); 
+        chair_action("previous meeting notes", "I move to read the previous meeting notes", phase_read_minutes);
+        chair_action("previous meeting notes", "I move to approve the previous meeting notes.. all those in favor say aye.", phase_read_minutes);
+        chair_action("approve agenda", "moves to approve this meeting's agenda", phase_approve_agenda);
+        chair_action("announcements", "moves to brief announcements", phase_announcements); 
+        chair_action("reports", "moves to reports", phase_reports); 
+        chair_action("old business", "moves to old business", phase_old_business); 
+        chair_action("new business", "moves to new business", phase_new_business); 
+        chair_action("good and welfare", "moves to good and welfare", phase_good_and_welfare); 
+        chair_action("pick next chair", "moves to pick the next chair", phase_chair_choose); 
+        nominate(phase_chair_nomination);
+        second_nomination(__s.notetaker, phase_chair_second);
+        chair_action("critique meeting", "moves to critique meeting", phase_meeting_critique); 
+        if(chair_action("adjorn", "I move to adjorn, all those in favor?", phase_end)) {
             __s.log_buffer.appendf("Meeting complete!");
         }
+
+        basic_action("point of order", "says \"point of order\"");
+        basic_action("point of information", "says \"point of information\"");
+        basic_action("raise hand", "<Raises hand>");
         imgui::EndChild();
     } else {
         imgui::SeparatorText("Notes");

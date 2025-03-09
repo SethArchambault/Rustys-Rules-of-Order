@@ -1,0 +1,25 @@
+used this before deciding to make it so tasks had to be valid:
+
+b32 basic_action(const char * title, const char * str, Person * person, Phase phase) {
+    if (imgui::Selectable(title)) {
+        // The chair calls the meeting to order
+        __s.log_buffer.appendf("%s %s\n", get_role_or_name(__s.selected), str);
+        if(__s.selected == person) {
+            if (__s.phase == phase-1) {
+                procedure(1);
+                __s.phase = phase;
+                return true;
+            } else if (__s.phase > phase) {
+                __s.log_buffer.appendf("... AGAIN\n");
+            } else {
+                __s.log_buffer.appendf("... but it's not time for that yet.\n");
+            }
+        } else if (person) {
+            __s.log_buffer.appendf("%s says, uhm, that's my job..\n", get_role_or_name(person));
+        } else {
+            __s.log_buffer.appendf("... but something feels wrong about it.\n");
+        }
+        procedure(-1);
+    }
+    return false;
+}
