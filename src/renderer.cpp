@@ -45,7 +45,7 @@ static void init(void) {
 void sa_begin(ImVec2 pos, ImVec2 size, const char * title) {
     ImGui::SetNextWindowPos(pos, ImGuiCond_Once);
     ImGui::SetNextWindowSize(size, ImGuiCond_Once);
-    ImGui::Begin(title, 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
+    ImGui::Begin(title, 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoMove);
 }
 #define sa_button ImGui::Button
 #define sa_text ImGui::Text
@@ -83,6 +83,10 @@ static void event(const sapp_event* ev) {
     }
 }
 
+V2f32 screen = {
+    380, 650
+};
+
 sapp_desc sokol_main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;
@@ -91,8 +95,8 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .frame_cb = frame,
         .cleanup_cb = cleanup,
         .event_cb = event,
-        .width = 500,
-        .height = 600,
+        .width = (s32)screen.x,
+        .height = (s32)screen.y,
         .window_title = "Rusty's Rules",
         .icon = {
             .sokol_default = true,

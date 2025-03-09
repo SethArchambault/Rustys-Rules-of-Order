@@ -46,5 +46,7 @@ lib/wasm/libsokol.a
 COMMENT
 
 time emcc -o temp/wasm/index.html "${options[@]}" 
-emrun temp/wasm/index.html
+if [ $# == 0 ]; then
+    emrun temp/wasm/index.html
+fi
 

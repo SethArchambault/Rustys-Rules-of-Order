@@ -59,7 +59,7 @@ enum Phase {
 // State
 struct {
     ImGuiTextBuffer log_buffer;
-    f32 scale = 1.5;
+    f32 scale = 2.0;
     b32 initialized;
     Person *selected;
     Person *chair;
@@ -133,11 +133,8 @@ void procedure(s32 change) {
             __s.people_arr[idx] = NULL;
         }
     }
-}
-void reset() {
     __s.selected = 0;
 }
-
 
 
 b32 basic_action(const char * str, Person * person, Phase phase) {
@@ -195,12 +192,13 @@ void game_loop() {
     };
 
 
-    sa_begin({0,0}, {500,600}, "Rusty's Rules");
+    sa_begin({0,0}, {screen.x,screen.y}, "Rusty's Rules");
     ImGui::SetWindowFontScale(__s.scale);
 
 
 
 
+    imgui::BeginChild("People", {0, 150});
 
     //
     // Draw people
@@ -212,7 +210,7 @@ void game_loop() {
             //sa::PushID(idx);
             if(sa::Button(person->name)){
                 __s.selected = person;
-                imgui::OpenPopup("actions-to-take");
+                //imgui::OpenPopup("actions-to-take");
             }
             if(__s.people_arr[idx] == __s.chair) {
                 sa::SameLine();
@@ -225,7 +223,11 @@ void game_loop() {
     //
     // Actions
     //
-    if (ImGui::BeginPopup("actions-to-take")) {
+
+    imgui::EndChild();
+    if (__s.selected) {
+        imgui::SeparatorText("Actions");
+        ImGui::BeginChild("actions", {screen.x -30,400}, ImGuiChildFlags_Borders, ImGuiWindowFlags_HorizontalScrollbar);
         basic_action("calls the meeting to order", __s.chair, phase_call_to_order);
         basic_action("moves to choose notetaker", __s.chair, phase_choose_notetaker);
         basic_action("moves to take attendance", __s.chair, phase_take_attendance); 
@@ -241,14 +243,14 @@ void game_loop() {
         if(basic_action("moves to adjorn", __s.chair, phase_end)) {
             __s.log_buffer.appendf("Meeting complete!");
         }
-        ImGui::EndPopup();
+        imgui::EndChild();
+    } else {
+        imgui::SeparatorText("Notes");
+        ImGui::BeginChild("notes", {screen.x -30,400}, ImGuiChildFlags_Borders);
+        ImGui::SetScrollY(1000);
+        imgui::TextWrapped("%s", __s.log_buffer.c_str());
+        imgui::EndChild();
     }
-
-    imgui::SeparatorText("Notes");
-    ImGui::BeginChild("scrolling", {470,400}, ImGuiChildFlags_Borders);
-    ImGui::SetScrollY(1000);
-    sa_text("%s", __s.log_buffer.c_str());
-    imgui::EndChild();
     imgui::End();
     
 }
