@@ -58,6 +58,7 @@ enum Phase {
 
 // State
 struct {
+    b32 scroll_down;
     ImGuiTextBuffer log_buffer;
     f32 scale = 2.0;
     b32 initialized;
@@ -134,6 +135,7 @@ void procedure(s32 change) {
         }
     }
     __s.selected = 0;
+    __s.scroll_down = true;
 }
 
 
@@ -245,8 +247,11 @@ void game_loop() {
         imgui::EndChild();
     } else {
         imgui::SeparatorText("Notes");
-        ImGui::BeginChild("notes", {screen.x -30,16*imgui::GetFontSize()}, ImGuiChildFlags_Borders);
-        ImGui::SetScrollY(1000);
+        ImGui::BeginChild("notes", {screen.x -30,0}, ImGuiChildFlags_Borders);
+        if (__s.scroll_down) {
+            __s.scroll_down = false;
+            imgui::SetScrollFromPosY(10000);
+        }
         imgui::TextWrapped("%s", __s.log_buffer.c_str());
         imgui::EndChild();
     }
