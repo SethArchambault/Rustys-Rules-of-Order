@@ -1,11 +1,9 @@
 # Setup 
 
-Open Wezterm
+To build on windows:
 
 ```
 vcvars64
-emsdk activate
-git submodule update --init --recursive
 ```
 
 # Log
