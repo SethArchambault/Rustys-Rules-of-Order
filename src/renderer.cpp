@@ -49,11 +49,6 @@ void sa_begin(ImVec2 pos, ImVec2 size, const char * title) {
 }
 #define sa_button ImGui::Button
 #define sa_text ImGui::Text
-void sa_show_debug_log_window(ImVec2 pos, ImVec2 size) {
-    imgui::SetNextWindowPos(pos,0);
-    imgui::SetNextWindowSize(size,0);
-    imgui::ShowDebugLogWindow();
-}
 
 extern void game_loop();
 static void frame(void) {
@@ -65,7 +60,6 @@ static void frame(void) {
     });
 
     game_loop();
-    ImGui::End();
     sg_begin_pass(sg_pass{ 
         .action = state.pass_action, 
         .swapchain = sglue_swapchain() 

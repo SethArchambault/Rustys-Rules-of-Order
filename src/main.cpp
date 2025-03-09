@@ -56,7 +56,10 @@ enum Phase {
     phase_end
 };
 
+// State
 struct {
+    ImGuiTextBuffer log_buffer;
+    f32 scale = 1.5;
     b32 initialized;
     Person *selected;
     Person *chair;
@@ -76,7 +79,6 @@ struct {
     const char *chair_str = "The chair";
 } __s;
 #define sa_log_text ImGui::LogText
-#define sa_debug_log imgui::DebugLog
 #define sa imgui
 
 
@@ -116,16 +118,16 @@ void procedure(s32 change) {
     if (change > 0) {
         c[0] = '+';
     }
-    sa_debug_log("procedure %d (%s%d)\n", __s.rating.procedure, c, change);
+    __s.log_buffer.appendf("procedure %d (%s%d)\n", __s.rating.procedure, c, change);
 
     for (s32 idx = 0; idx < ArrayCount(__s.people_arr); ++idx) {
         Person *person = __s.people_arr[idx];
         if(person && __s.rating.procedure < person->tolerance) {
             if (total_people() > 1) {
-                sa_debug_log("%s gets up and storms out\n", get_role_or_name(person));
+                __s.log_buffer.appendf("%s gets up and storms out\n", get_role_or_name(person));
             } else {
-                sa_debug_log("%s, defeated, leaves dejectedly\n", get_role_or_name(person));
-                sa_debug_log("Without people, there can be no democracy. Game Over.\n");
+                __s.log_buffer.appendf("%s, defeated, leaves dejectedly\n", get_role_or_name(person));
+                __s.log_buffer.appendf("Without people, there can be no democracy. Game Over.\n");
             }
             clear_person(__s.people_arr[idx]);
             __s.people_arr[idx] = NULL;
@@ -139,23 +141,23 @@ void reset() {
 
 
 b32 basic_action(const char * str, Person * person, Phase phase) {
-    if (sa_button(str)) {
+    if (imgui::Selectable(str)) {
         // The chair calls the meeting to order
-        sa_debug_log("%s %s\n", get_role_or_name(__s.selected), str);
+        __s.log_buffer.appendf("%s %s\n", get_role_or_name(__s.selected), str);
         if(__s.selected == person) {
             if (__s.phase == phase-1) {
                 procedure(1);
                 __s.phase = phase;
                 return true;
             } else if (__s.phase > phase) {
-                sa_debug_log("... AGAIN\n");
+                __s.log_buffer.appendf("... AGAIN\n");
             } else {
-                sa_debug_log("... but it's not time for that yet.\n");
+                __s.log_buffer.appendf("... but it's not time for that yet.\n");
             }
         } else if (person) {
-            sa_debug_log("%s says, uhm, that's my job..\n", get_role_or_name(person));
+            __s.log_buffer.appendf("%s says, uhm, that's my job..\n", get_role_or_name(person));
         } else {
-            sa_debug_log("... but something feels wrong about it.\n");
+            __s.log_buffer.appendf("... but something feels wrong about it.\n");
         }
         procedure(-1);
     }
@@ -177,6 +179,11 @@ void game_loop() {
         __s.initialized = 1;
         srand((u32)time(NULL));  
 
+
+        imgui::GetStyle().ScaleAllSizes(__s.scale);
+        // gets pixelated
+        //ImGui::GetIO().FontGlobalScale = 1.5;
+        
         // seth so dumb
         __s.people_arr[0] = (Person * )malloc(200);
         __s.people_arr[1] = (Person * )malloc(200);
@@ -188,7 +195,12 @@ void game_loop() {
     };
 
 
-    sa_begin({0,0}, {300,600}, "Rusty's Rules");
+    sa_begin({0,0}, {500,600}, "Rusty's Rules");
+    ImGui::SetWindowFontScale(__s.scale);
+
+
+
+
 
     //
     // Draw people
@@ -197,26 +209,23 @@ void game_loop() {
     for (s32 idx = 0; idx < ArrayCount(__s.people_arr); ++idx) {
         Person *person = __s.people_arr[idx];
         if(person) {
-            sa::PushID(idx);
-            if(sa::RadioButton(person->name, person == __s.selected)){
+            //sa::PushID(idx);
+            if(sa::Button(person->name)){
                 __s.selected = person;
+                imgui::OpenPopup("actions-to-take");
             }
             if(__s.people_arr[idx] == __s.chair) {
                 sa::SameLine();
                 sa_text("(chair)");
             }
-            sa::PopID();
+            //sa::PopID();
         }
     }
-
-
 
     //
     // Actions
     //
-
-    if (__s.selected) {
-        sa::SeparatorText( __s.selected->name);
+    if (ImGui::BeginPopup("actions-to-take")) {
         basic_action("calls the meeting to order", __s.chair, phase_call_to_order);
         basic_action("moves to choose notetaker", __s.chair, phase_choose_notetaker);
         basic_action("moves to take attendance", __s.chair, phase_take_attendance); 
@@ -230,10 +239,13 @@ void game_loop() {
         basic_action("moves to pick the next chair", __s.chair, phase_next_chair); 
         basic_action("moves to critique meeting", __s.chair, phase_meeting_critique); 
         if(basic_action("moves to adjorn", __s.chair, phase_end)) {
-            sa_debug_log("Meeting complete!");
+            __s.log_buffer.appendf("Meeting complete!");
         }
+        ImGui::EndPopup();
     }
 
-    sa_show_debug_log_window({300, -85}, {520,705});
+    sa_text("%s", __s.log_buffer.c_str());
+    imgui::End();
+    
 }
 

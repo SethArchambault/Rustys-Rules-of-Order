@@ -23,14 +23,14 @@ echo "memory needed(aligned): $memory_needed_aligned"
 
 options=(
 -g
-src/main.c 
+src/main.cpp
 lib/wasm/libcimgui.a
 lib/wasm/libsokol.a
 -I include 
 -ferror-limit=4 -O0 
 -Wno-emcc 
 -sINITIAL_MEMORY=${memory_needed_aligned}
---shell-file=include/shell.html
+--shell-file=src/shell.html
 -sALLOW_MEMORY_GROWTH
 -DSOKOL_GLES3 
 -sUSE_WEBGL2
