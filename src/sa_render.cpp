@@ -5,9 +5,10 @@
 #include "sokol/sokol_glue.h"
 #include "sokol/sokol_log.h"
 #include "rusty.h"
+#include "sa_types.h"
 #include "imgui/imgui.h"
 #include "sokol/util/sokol_imgui.h"
-#include "rusty_render.h"
+#include "sa_render.h"
 #endif
 
 static void init(void) {
@@ -72,9 +73,9 @@ sapp_desc sokol_main(int argc, char* argv[]) {
         .frame_cb = frame,
         .cleanup_cb = cleanup,
         .event_cb = event,
-        .width = (s32)screen.x,
-        .height = (s32)screen.y,
-        .window_title = "Rusty's Rules",
+        .width = (s32)project_config.screen.x,
+        .height = (s32)project_config.screen.y,
+        .window_title = project_config.title,
         .icon = {
             .sokol_default = true,
         },
