@@ -30,7 +30,7 @@ lib/wasm/libsokol.a
 -ferror-limit=4 -O0 
 -Wno-emcc 
 -sINITIAL_MEMORY=${memory_needed_aligned}
---shell-file=src/shell.html
+--shell-file=src/rusty_shell.html
 -sALLOW_MEMORY_GROWTH
 -DSOKOL_GLES3 
 -sUSE_WEBGL2

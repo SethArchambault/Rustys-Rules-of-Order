@@ -1,17 +1,17 @@
-#ifndef TYPES_H
-#define TYPES_H
-#include <stddef.h>
+#ifndef RUSTY_H
+#define RUSTY_H
+
+#ifdef ALE_TESTING
 #include <stdint.h>
-#include <math.h>
-#include "sokol/sokol_app.h"
+#include <stddef.h> // size_t
+#endif
+
+#define _USE_MATH_DEFINES
 
 #define ArrayCount(arr) (s32)sizeof(arr) / (s32)sizeof(arr[0])
-
-#define BUFFER_MAX  50000
-
 #define assert(expr) if(!(expr)) { printf("%s:%d %s() %s\n",__FILE__,__LINE__, __func__, #expr); *(volatile int *)0 = 0; }
 
-
+#define BUFFER_MAX  50000
 #define FRAME_MAX 20
 
 /// Types ////
@@ -36,17 +36,12 @@ typedef u8          b8;
 
 /// Vectors
 
-#define structdef(Name) \
-    typedef struct Name Name; \
-    struct Name
-
-
-structdef(V2s32) {
+struct V2s32 {
     s32 x;
     s32 y;
 };
 
-structdef(V3s32) {
+struct V3s32 {
     union {
         s32 x;
         s32 r;
@@ -61,12 +56,12 @@ structdef(V3s32) {
     };
 };
 
-structdef(V2f32) {
+struct V2f32 {
     f32 x;
     f32 y;
 };
 
-structdef(V3f32) {
+struct V3f32 {
     union {
         f32 x;
         f32 r;
@@ -81,65 +76,18 @@ structdef(V3f32) {
     };
 };
 
-structdef(V4f32) {
+struct V4f32 {
     f32 r;
     f32 g;
     f32 b;
     f32 a;
 };
 
-structdef(V4s32) {
+struct V4s32 {
     s32 r;
     s32 g;
     s32 b;
     s32 a;
 };
-
-
-/*
-structdef(Buffer) {
-    u64 size;
-    u8 *data;
-};
-typedef Buffer String;
-*/
-
-
-
-//
-/// Memory
-//
-
-
-#define Kilobytes(count) (u64) (count * 1024)
-#define Megabytes(count) (u64) (count * 1024 * 1024)
-#define Gigabytes(count) (u64) (count * 1024 * 1024 * 1024)
-
-
-structdef(Arena) {
-    u8 *mem;
-    u64 cap;
-    u64 alloc_pos;
-    u64 commit_pos;
-    u64 high_water_mark;
-};
-
-
-
-
-// 
-/// renderer
-//
-
-structdef(Bind) {
-    u32 idx;
-};
-
-
-
-
-typedef struct {
-    s32 id;
-} Sprite_index;
 
 #endif

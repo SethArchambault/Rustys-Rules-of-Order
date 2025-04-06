@@ -3,15 +3,29 @@
 #define SOKOL_D3D11
 #endif
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <stddef.h>
+#include <stdint.h>
+#include <math.h>
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
 
-#define _USE_MATH_DEFINES
+#include "sokol/sokol_app.h"
+#include "sokol/sokol_gfx.h"
+#include "sokol/sokol_glue.h"
+#include "sokol/sokol_log.h"
 #include "rusty.h"
-#include "memory.h"
+#include "imgui/imgui.h"
+#include "sokol/util/sokol_imgui.h"
+#include "rusty_render.h"
 
-#include "renderer.cpp"
+#include "rusty_render.cpp"
+
+#define imgui ImGui
 
 
 #define create_enum(name) name,
@@ -115,9 +129,6 @@ struct {
     const char *chair_str = "The chair";
     //const char *notetaker_str = "The notetaker";
 } __s;
-#define sa_log_text ImGui::LogText
-#define sa imgui
-
 
 //
 // Helper
@@ -307,7 +318,7 @@ void game_loop() {
     };
 
 
-    sa_begin({0,0}, {screen.x,screen.y}, "Rusty's Rules");
+    render_begin({0,0}, {screen.x,screen.y}, "Rusty's Rules");
     ImGui::SetWindowFontScale(__s.scale);
 
 
@@ -319,17 +330,17 @@ void game_loop() {
     for (s32 idx = 0; idx < ArrayCount(__s.people_arr); ++idx) {
         Person *person = __s.people_arr[idx];
         if(person) {
-            if(sa::Selectable(person->name, person == __s.selected)){
+            if(imgui::Selectable(person->name, person == __s.selected)){
                 __s.selected = person;
                 //imgui::OpenPopup("actions-to-take");
             }
             if(__s.people_arr[idx] == __s.chair) {
-                sa::SameLine();
-                sa_text("(chair)");
+                imgui::SameLine();
+                imgui::Text("(chair)");
             }
             if(__s.people_arr[idx] == __s.notetaker) {
-                sa::SameLine();
-                sa_text("(notetaker)");
+                imgui::SameLine();
+                imgui::Text("(notetaker)");
             }
         }
     }
