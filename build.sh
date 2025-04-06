@@ -25,7 +25,7 @@ normal_build=(
 -I include 
 -I include/imgui
 -I include/sokol
-src/main.cpp
+src/rusty.cpp
 -L lib/macos
 -lsokol
 -fobjc-arc
@@ -45,6 +45,6 @@ src/main.cpp
 # Note that imgui is added to the archive as well.
 
 echo "normal build"
-time clang++ -std=c++20 -o temp/main "${normal_build[@]}"
-MallocNanoZone=0 temp/main
+time clang++ -std=c++20 -o temp/rusty "${normal_build[@]}"
+MallocNanoZone=0 temp/rusty
 

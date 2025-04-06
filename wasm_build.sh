@@ -23,7 +23,7 @@ echo "memory needed(aligned): $memory_needed_aligned"
 
 options=(
 -g
-src/main.cpp
+src/rusty.cpp
 lib/wasm/libcimgui.a
 lib/wasm/libsokol.a
 -I include 

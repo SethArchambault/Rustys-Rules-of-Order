@@ -6,7 +6,11 @@
 #include <math.h>
 #include<time.h>
 #define _USE_MATH_DEFINES
-#include "types.h"
+
+#ifdef ALE_TESTING
+#include "rusty.h"
+#endif
+
 #include "memory.h"
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_gfx.h"
