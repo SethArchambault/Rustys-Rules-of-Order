@@ -62,6 +62,9 @@ static void event(const sapp_event* ev) {
             sapp_request_quit();
         }
     }
+    if (ev->type == SAPP_EVENTTYPE_RESIZED) {
+        game_resized();
+    }
 }
 
 

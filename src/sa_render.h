@@ -7,5 +7,6 @@
 #endif
 
 extern void game_loop();
+extern void game_resized();
 
 #endif

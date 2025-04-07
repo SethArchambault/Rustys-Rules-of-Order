@@ -49,6 +49,7 @@ s32 total_people() {
 
 void rating(s32 procedure, s32 democracy = 0){
     __s.rating[rating_procedure] += procedure;
+    printf("seth rating %d\n", __s.rating[rating_procedure]);
     __s.rating[rating_democracy] += democracy;
     for (s32 idx = 0; idx < ArrayCount(__s.people_arr); ++idx) {
         Person *person = __s.people_arr[idx];
@@ -174,6 +175,13 @@ void create_person(Person * person, const char * name, s32 patience) {
 
 
 }
+
+void game_resized() {
+    __s.screen.x = sapp_width();
+    __s.screen.y = sapp_height();
+    printf("resized %f, %f\n", __s.screen.x, __s.screen.y);
+}
+
 void game_loop() {
 
     // 
@@ -201,15 +209,10 @@ void game_loop() {
         __s.chair = __s.people_arr[0];
         __s.screen.x = sapp_width();
         __s.screen.y = sapp_height();
-
-
     };
-
 
     render_begin({0,0}, {__s.screen.x,__s.screen.y}, "Rusty's Rules");
     ImGui::SetWindowFontScale(__s.scale);
-
-
 
     //
     // Draw people
