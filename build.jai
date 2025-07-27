@@ -1,19 +1,48 @@
-
 #run {
+  make_directory_if_it_does_not_exist("temp");
   set_build_options_dc(.{
     do_output=false,
   });
+  options := get_build_options();
+  recreate_libsokol_from_jai := false;
+  args := options.compile_time_command_line;
+  for arg: args {
+    if arg == {
+      case "recompile"; {
+        recreate_libsokol_from_jai = true;
+      }
+    }
+  }
+
+  if recreate_libsokol_from_jai {
+    build_ok := build_cpp(
+      "lib/macos/libsokol_from_jai",
+      "lib/macos/sokol.mm",
+      library_files = .[
+      ],
+      type = .STATIC_LIBRARY,
+      extra = .[
+        "-I", "include",
+        "-I", "include/sokol",
+        "-I", "include/imgui",
+      ]
+    );
+    assert(build_ok);
+  }
   build_ok := build_cpp(
     "temp/rusty_from_jai",
     "src/rusty.cpp",
-    compiler_executable_path = "clang++",
     library_files = .[
     ],
     type = .EXECUTABLE,
+    debug = true,
     extra = .[
+      // optional
+      //"-fsanitize=address",
+      // required
       "-I", "include",
       "-L", "lib/macos",
-      "-lsokol",
+      "-lsokol_from_jai",
       "-framework", "Metal", 
       "-framework", "Cocoa", 
       "-framework", "MetalKit", 
@@ -22,35 +51,15 @@
     ]
   );
   assert(build_ok);
-
-  //opts: Generate_Bindings_Options;
-  //array_add(*opts.libraries, .{filename="c_file"});
-  //array_add(*opts.extra_clang_arguments, "-x", "c++");
-  //array_add(*opts.source_files, "c_file.h");
-
-
-
   run_command("temp/rusty_from_jai");
 }
 #import "Basic";
+#import "File";
 #import "Compiler";
 #import "BuildCpp";
 #import "Process";
-#import "Bindings_Generator";
 
 /*
-set -e
-mkdir -p temp
-
-normal_build=(
--g
--fsanitize=address 
--I include 
--I include/imgui
--I include/sokol
-src/rusty.cpp
--L lib/macos
--lsokol
 -fobjc-arc
 -Werror -Wall -Wextra -Wshadow -Wconversion
 -Wno-unused-variable -Wno-unused-parameter -Wno-deprecated-declarations -Wno-unused-value 
@@ -61,13 +70,5 @@ src/rusty.cpp
 -ferror-limit=6 -O0 
 -Wno-address-of-temporary
 )
-
-# you could compile just by including lib/macos/sokol.mm, but that adds a few seconds, so instead we 
-# create lib/macos/libsokol.a this way:
-# clang -I include -I include/sokol -I include/imgui -c lib/macos/sokol.mm -o sokol.o && ar -r lib/macos/libsokol.a sokol.o && rm sokol.o
-# Note that imgui is added to the archive as well.
-
-echo "normal build"
-time clang++ -std=c++20 -o temp/rusty "${normal_build[@]}"
 MallocNanoZone=0 temp/rusty
 */
